@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.bsproperty">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity
+            android:name=".ui.UserMainActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.bsdiy.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <activity android:name=".ui.LoadingActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.LoginActivity" />
+        <activity android:name=".ui.RgActivity" />
+        <activity android:name=".ui.SongDetailActivity" />
+        <activity android:name=".ui.MySongActivity" />
+        <activity android:name=".ui.AccompanimentActivity" />
+        <activity android:name=".ui.PlayActivity" />
+        <activity android:name=".ui.SubmitActivity" />
+        <activity android:name=".ui.BoysListActivity" />
+        <activity android:name=".ui.GirlsListActivity"></activity>
+
+        <meta-data android:name="com.baidu.speech.APP_ID"
+            android:value="11127432" />
+        <meta-data
+            android:name="com.baidu.speech.API_KEY"
+            android:value="1hlwwkQ4j5WkYU9oxTm4jB2f" />
+        <meta-data
+            android:name="com.baidu.speech.SECRET_KEY"
+            android:value="1835f3b93148d7e9b580bacc17de5088" />
+
+        <service android:name="com.baidu.speech.VoiceRecognitionService" android:exported="false" />
+    </application>
+
+</manifest>

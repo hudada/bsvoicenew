@@ -1,0 +1,148 @@
+package com.example.bsproperty.ui;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+
+import com.example.bsproperty.MyApplication;
+import com.example.bsproperty.R;
+import com.example.bsproperty.adapter.BaseAdapter;
+import com.example.bsproperty.bean.BaseResponse;
+import com.example.bsproperty.bean.SongBean;
+import com.example.bsproperty.bean.SongListBean;
+import com.example.bsproperty.fragment.UserFragment01;
+import com.example.bsproperty.net.ApiManager;
+import com.example.bsproperty.net.BaseCallBack;
+import com.example.bsproperty.net.OkHttpTools;
+
+import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public class BoysListActivity extends BaseActivity {
+
+    @BindView(R.id.rv_list)
+    RecyclerView rvList;
+    @BindView(R.id.sl_list)
+    SwipeRefreshLayout slList;
+    @BindView(R.id.btn_back)
+    ImageButton btnBack;
+
+    private ArrayList<SongBean> mData;
+    private MyAdapter adapter;
+
+    @Override
+    protected void initView(Bundle savedInstanceState) {
+        rvList.setLayoutManager(new LinearLayoutManager(mContext));
+        mData = new ArrayList<>();
+        adapter = new MyAdapter(mContext, R.layout.item_voice, mData);
+        rvList.setAdapter(adapter);
+        slList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                slList.setRefreshing(false);
+            }
+        });
+
+    }
+
+    @Override
+    protected int getRootViewId() {
+        return R.layout.activity_boylist;
+    }
+
+    @Override
+    protected void loadData() {
+        long id;
+        if (MyApplication.getInstance().getUserBean() == null) {
+            id = -1;
+        } else {
+            id = MyApplication.getInstance().getUserBean().getId();
+        }
+        OkHttpTools.sendGet(mContext, ApiManager.SONG_RANK)
+                .addParams("type", "1")
+                .addParams("uid", id + "")
+                .build()
+                .execute(new BaseCallBack<SongListBean>(mContext, SongListBean.class) {
+                    @Override
+                    public void onResponse(SongListBean songListBean) {
+                        mData = songListBean.getData();
+                        adapter.notifyDataSetChanged(mData);
+                    }
+                });
+    }
+
+    @OnClick(R.id.btn_back)
+    public void onViewClicked() {
+        finish();
+    }
+
+    private class MyAdapter extends BaseAdapter<SongBean> {
+
+        public MyAdapter(Context context, int layoutId, ArrayList<SongBean> data) {
+            super(context, layoutId, data);
+        }
+
+        @Override
+        public void initItemView(BaseViewHolder holder, final SongBean songBean, final int position) {
+            holder.setText(R.id.tv_name, songBean.getName());
+            holder.setText(R.id.tv_total, "时间：" + MyApplication.formatTime.format(songBean.getLength()) + "s");
+            holder.setText(R.id.tv_username, "用户名：" + songBean.getUname());
+            ImageView like = (ImageView) holder.getView(R.id.iv_like);
+            if (songBean.isLike()) {
+                like.setImageResource(R.drawable.ic_favorite_red_300_24dp);
+            } else {
+                like.setImageResource(R.drawable.ic_favorite_white_24dp);
+            }
+            holder.setText(R.id.tv_like, "(" + songBean.getLikeSum() + ")");
+            holder.setText(R.id.tv_sex, "男声");
+            holder.getView(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+            like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (MyApplication.getInstance().getUserBean() != null) {
+                        if (songBean.isLike()) {
+                            OkHttpTools.sendPost(mContext, ApiManager.LIKE_DEL)
+                                    .addParams("uid", MyApplication.getInstance().getUserBean().getId() + "")
+                                    .addParams("sid", songBean.getId() + "")
+                                    .build()
+                                    .execute(new BaseCallBack<BaseResponse>(mContext, BaseResponse.class) {
+                                        @Override
+                                        public void onResponse(BaseResponse baseResponse) {
+                                            mData.get(position).setLike(false);
+                                            adapter.notifyItemChanged(position, "one");
+                                        }
+                                    });
+                        } else {
+                            OkHttpTools.sendPost(mContext, ApiManager.LIKE_ADD)
+                                    .addParams("uid", MyApplication.getInstance().getUserBean().getId() + "")
+                                    .addParams("sid", songBean.getId() + "")
+                                    .build()
+                                    .execute(new BaseCallBack<BaseResponse>(mContext, BaseResponse.class) {
+                                        @Override
+                                        public void onResponse(BaseResponse baseResponse) {
+                                            mData.get(position).setLike(true);
+                                            adapter.notifyItemChanged(position, "one");
+                                        }
+                                    });
+                        }
+
+                    }
+
+                }
+            });
+        }
+    }
+}

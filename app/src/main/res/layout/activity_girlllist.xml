@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/ddd"
+        />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/sl_list"
+        android:background="#00ffffff"
+        android:layout_marginTop="72dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="#00ffffff"
+            android:layout_gravity="center"
+            android:layout_margin="6dp"
+            android:layout_weight="1">
+        </android.support.v7.widget.RecyclerView>
+    </android.support.v4.widget.SwipeRefreshLayout>
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:paddingLeft="5dp"
+        android:layout_marginTop="15dp"
+        android:paddingRight="5dp"
+        android:layout_height="48dp"
+        android:background="@null"
+        android:src="@drawable/ic_keyboard_arrow_left_white_36dp" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="女声排行榜"
+        android:textSize="32sp"
+        android:textColor="#EEffffff"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="15dp"/>
+</RelativeLayout>
