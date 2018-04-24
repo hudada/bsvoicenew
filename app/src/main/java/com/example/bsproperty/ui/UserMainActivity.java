@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -15,6 +16,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,7 +40,12 @@ import com.example.bsproperty.utils.SpUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -81,7 +88,7 @@ public class UserMainActivity extends BaseActivity {
             R.drawable.ic_format_list_bulleted_white_24dp,
             R.drawable.ic_person_white_24dp
     };
-    private EventManager asr;
+
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -90,10 +97,10 @@ public class UserMainActivity extends BaseActivity {
                 .permissions(Manifest.permission.RECORD_AUDIO,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         Manifest.permission.ACCESS_NETWORK_STATE,
-                        Manifest.permission.INTERNET,
-                        Manifest.permission.READ_PHONE_STATE
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.INTERNET
                 ).request();
-
 
         EventBus.getDefault().register(this);
         MyApplication.getInstance().setUserBean(SpUtils.getUserBean(this));
@@ -140,13 +147,10 @@ public class UserMainActivity extends BaseActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         audioRecoderUtils.startRecord();
-                        String json = "{\"accept-audio-data\":false,\"disable-punctuation\":false,\"accept-audio-volume\":true,\"pid\":1536}";
-                        asr.send(SpeechConstant.ASR_START, json, null, 0, 0);
                         showToast("松开手结束录制");
                         break;
                     case MotionEvent.ACTION_UP:
                         audioRecoderUtils.stopRecord(true);
-                        asr.send(SpeechConstant.ASR_STOP, null, null, 0, 0);
                         break;
                 }
                 return true;
@@ -243,29 +247,13 @@ public class UserMainActivity extends BaseActivity {
                         .setPositiveButton("是的", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
+                                Intent intent = new Intent(mContext, SongDetailActivity.class);
+                                intent.putExtra("path", mPath);
+                                startActivity(intent);
                             }
                         })
                         .setNegativeButton("不用", null)
                         .show();
-            }
-        });
-        asr = EventManagerFactory.create(this, "asr");
-
-        asr.registerListener(new EventListener() {
-            @Override
-            public void onEvent(String s, String s1, byte[] bytes, int i, int i1) {
-                if (s.equals(SpeechConstant.CALLBACK_EVENT_ASR_READY)) {
-//                    showToast("松开手结束录制");
-                }
-                if (s.equals(SpeechConstant.CALLBACK_EVENT_ASR_FINISH)) {
-                    // 识别结束
-//                    Toast.makeText(MainActivity.this, "ok1", Toast.LENGTH_SHORT).show();
-                }
-                if (s.equals(SpeechConstant.CALLBACK_EVENT_ASR_PARTIAL)){
-//                    Toast.makeText(MainActivity.this, "ok2", Toast.LENGTH_SHORT).show();
-
-                }
             }
         });
     }

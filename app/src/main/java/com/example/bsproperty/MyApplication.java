@@ -20,7 +20,7 @@ public class MyApplication extends Application {
     private static MyApplication instance;
     private UserBean userBean;
     public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    public static SimpleDateFormat formatTime = new SimpleDateFormat("ss");
+    public static SimpleDateFormat formatTime = new SimpleDateFormat("mm:ss");
 
     @Override
     public void onCreate() {

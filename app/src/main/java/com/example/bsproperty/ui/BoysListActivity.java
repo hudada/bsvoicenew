@@ -16,9 +16,11 @@ import com.example.bsproperty.bean.BaseResponse;
 import com.example.bsproperty.bean.SongBean;
 import com.example.bsproperty.bean.SongListBean;
 import com.example.bsproperty.fragment.UserFragment01;
+import com.example.bsproperty.fragment.UserFragment02;
 import com.example.bsproperty.net.ApiManager;
 import com.example.bsproperty.net.BaseCallBack;
 import com.example.bsproperty.net.OkHttpTools;
+import com.example.bsproperty.utils.Player;
 
 import java.util.ArrayList;
 
@@ -37,6 +39,8 @@ public class BoysListActivity extends BaseActivity {
 
     private ArrayList<SongBean> mData;
     private MyAdapter adapter;
+    private Player player;
+    private int currPosition = -1;
 
     @Override
     protected void initView(Bundle savedInstanceState) {
@@ -103,12 +107,19 @@ public class BoysListActivity extends BaseActivity {
             }
             holder.setText(R.id.tv_like, "(" + songBean.getLikeSum() + ")");
             holder.setText(R.id.tv_sex, "男声");
-            holder.getView(R.id.btn_play).setOnClickListener(new View.OnClickListener() {
+            ImageButton play = (ImageButton) holder.getView(R.id.btn_play);
+            play.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    playVoice(ApiManager.VOICE_PATH + songBean.getAddr()
+                            , position);
                 }
             });
+            if (songBean.isPlay()) {
+                play.setImageResource(R.drawable.ic_pause_circle_outline_white_24dp);
+            } else {
+                play.setImageResource(R.drawable.ic_play_circle_outline_white_24dp);
+            }
             like.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -121,6 +132,8 @@ public class BoysListActivity extends BaseActivity {
                                     .execute(new BaseCallBack<BaseResponse>(mContext, BaseResponse.class) {
                                         @Override
                                         public void onResponse(BaseResponse baseResponse) {
+                                            mData.get(position).setLikeSum(mData.get(position)
+                                                    .getLikeSum() - 1);
                                             mData.get(position).setLike(false);
                                             adapter.notifyItemChanged(position, "one");
                                         }
@@ -133,6 +146,8 @@ public class BoysListActivity extends BaseActivity {
                                     .execute(new BaseCallBack<BaseResponse>(mContext, BaseResponse.class) {
                                         @Override
                                         public void onResponse(BaseResponse baseResponse) {
+                                            mData.get(position).setLikeSum(mData.get(position)
+                                                    .getLikeSum() + 1);
                                             mData.get(position).setLike(true);
                                             adapter.notifyItemChanged(position, "one");
                                         }
@@ -143,6 +158,58 @@ public class BoysListActivity extends BaseActivity {
 
                 }
             });
+        }
+    }
+
+    private void playVoice(String s, final int position) {
+        if (position == currPosition) {
+            if (player.getMediaPlayer().isPlaying()) {
+                player.pause();
+                mData.get(position).setPlay(false);
+            } else {
+                mData.get(position).setPlay(true);
+                player.play(true);
+            }
+            adapter.notifyItemChanged(position, "one");
+        } else {
+            if (player != null) {
+                player.stop();
+                mData.get(currPosition).setPlay(false);
+                adapter.notifyItemChanged(currPosition, "one");
+                player.release();
+            }
+            currPosition = position;
+            player = new Player(s, null, new Player.OnPlayListener() {
+                @Override
+                public void onLoad(int duration) {
+                }
+
+                @Override
+                public void onProgress(int position) {
+                }
+
+                @Override
+                public void onCompletion() {
+                    player = null;
+                    mData.get(position).setPlay(false);
+                    adapter.notifyItemChanged(position, "one");
+                    currPosition = -1;
+                }
+            });
+            player.play(true);
+            mData.get(position).setPlay(true);
+            adapter.notifyItemChanged(position, "one");
+        }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (player != null) {
+            player.stop();
+            player.release();
+            player = null;
         }
     }
 }

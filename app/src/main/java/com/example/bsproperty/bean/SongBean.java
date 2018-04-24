@@ -13,7 +13,7 @@ public class SongBean implements Serializable {
     private int type;  //1=男，0=女
     private int likeSum;
     private String uname;
-    private boolean isLike;
+    private boolean like;
     private boolean isPlay;
 
     public Long getId() {
@@ -81,11 +81,11 @@ public class SongBean implements Serializable {
     }
 
     public boolean isLike() {
-        return isLike;
+        return like;
     }
 
     public void setLike(boolean like) {
-        isLike = like;
+        this.like = like;
     }
 
     public boolean isPlay() {

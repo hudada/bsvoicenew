@@ -67,6 +67,14 @@ public class UserFragment01 extends BaseFragment {
         loadWebData();
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser && mContext!=null){
+            loadWebData();
+        }
+    }
+
     private void loadWebData() {
         mData.clear();
         long id;
@@ -197,6 +205,8 @@ public class UserFragment01 extends BaseFragment {
                                     .execute(new BaseCallBack<BaseResponse>(mContext, BaseResponse.class) {
                                         @Override
                                         public void onResponse(BaseResponse baseResponse) {
+                                            mData.get(position).setLikeSum(mData.get(position)
+                                                    .getLikeSum() - 1);
                                             mData.get(position).setLike(false);
                                             adapter.notifyItemChanged(position, "one");
                                         }
@@ -209,6 +219,8 @@ public class UserFragment01 extends BaseFragment {
                                     .execute(new BaseCallBack<BaseResponse>(mContext, BaseResponse.class) {
                                         @Override
                                         public void onResponse(BaseResponse baseResponse) {
+                                            mData.get(position).setLikeSum(mData.get(position)
+                                                    .getLikeSum() + 1);
                                             mData.get(position).setLike(true);
                                             adapter.notifyItemChanged(position, "one");
                                         }
@@ -235,8 +247,11 @@ public class UserFragment01 extends BaseFragment {
         } else {
             if (player != null) {
                 player.stop();
+                mData.get(currPosition).setPlay(false);
+                adapter.notifyItemChanged(currPosition, "one");
                 player.release();
             }
+            currPosition = position;
             player = new Player(s, null, new Player.OnPlayListener() {
                 @Override
                 public void onLoad(int duration) {
@@ -251,6 +266,7 @@ public class UserFragment01 extends BaseFragment {
                     player = null;
                     mData.get(position).setPlay(false);
                     adapter.notifyItemChanged(position, "one");
+                    currPosition = -1;
                 }
             });
             player.play(true);
@@ -259,6 +275,15 @@ public class UserFragment01 extends BaseFragment {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (player != null) {
+            player.stop();
+            player.release();
+            player = null;
+        }
+    }
 
     @Override
     public void onDestroy() {

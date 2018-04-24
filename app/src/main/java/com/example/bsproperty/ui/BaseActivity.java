@@ -5,14 +5,18 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.bsproperty.view.ProgressDialog;
 
 import java.io.Serializable;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -104,4 +108,29 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         return false;
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        for (int indext = 0; indext < fragmentManager.getFragments().size(); indext++) {
+            Fragment fragment = fragmentManager.getFragments().get(indext);
+            if (fragment == null) {
+            } else {
+                handleResult(fragment, requestCode, resultCode, data);
+            }
+        }
+
+    }
+
+    private void handleResult(Fragment fragment, int requestCode, int resultCode, Intent data) {
+        fragment.onActivityResult(requestCode, resultCode, data);
+        List<Fragment> childFragment = fragment.getChildFragmentManager().getFragments();
+        if (childFragment != null)
+            for (Fragment f : childFragment)
+                if (f != null) {
+                    handleResult(f, requestCode, resultCode, data);
+                }
+    }
+
 }
